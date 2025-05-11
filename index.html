@@ -2,15 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Typing Trainer</title>
+    <title>Typing Checker</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="container">
-    <h1>Typing Trainer</h1>
+    <h1>Typing Checker</h1>
 
-    <p>Word <span id="word-number">1</span>/10: <strong id="current-word">Loading…</strong></p>
+    <p>
+        Sentence <span id="word-number">1</span> of
+        <span id="total-lines">10</span>:
+        <strong id="current-word">Loading…</strong>
+    </p>
+
     <textarea id="input-area" placeholder="Type the word and press Enter…" autofocus></textarea>
+
+    <p>
+        Sentences: <span id="count-display">10</span>
+        <input id="count-slider" type="range" min="5" max="15" value="10" step="1">
+    </p>
 
     <button id="restart-btn">Restart</button>
     <button id="skip-btn">Skip</button>

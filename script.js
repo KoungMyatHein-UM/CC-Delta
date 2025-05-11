@@ -1,136 +1,223 @@
-/* ==== CONFIG ===== */
-const LINES_TO_TYPE = 10;      // how many sentences the user will type
-const MAX_MS = 1500;           // option 1 – hard cap
-const GAP_MS = 1000;           // option 2 – burst split
+/* =========================================================
+   Typing‑timing trainer – sentences edition
+   ---------------------------------------------------------
+   • Loads sentences from sentences.txt (one per line)
+   • Lets the user pick how many sentences to type (5‑15)
+   • Tracks time between every consecutive keystroke, but
+     – ignores gaps ≥ 1 s (burst split)           [option 2]
+     – ignores gaps > 1.5 s (hard cap)            [option 1]
+     – ignores pairs that include the Enter key    [option 4]
+   • “Skip” button jumps to the next sentence
+   • “Save” downloads pair‑timings JSON
+   ========================================================= */
 
-/* ==== ELEMENTS ==== */
-const inputArea     = document.getElementById("input-area");
-const restartBtn    = document.getElementById("restart-btn");
-const saveBtn       = document.getElementById("save-btn");
-const pairOut       = document.getElementById("pair-output");
-const typedOut      = document.getElementById("typed-words");
-const currentLineEl = document.getElementById("current-word");   // re‑use the span
-const lineNumEl     = document.getElementById("word-number");    // re‑use the span
-const skipBtn       = document.getElementById("skip-btn");
+/* ---------- tunables ---------- */
+const MAX_MS = 1500;     // option 1 – discard gaps > 1500 ms
+const GAP_MS = 1000;     // option 2 – new burst if gap ≥ 1000 ms
 
-/* ==== STATE ==== */
-let allLines   = [];          // loaded from sentences.txt
-let targetLines= [];
-let idx        = 0;
-let typedLines = [];
+/* ---------- element handles ---------- */
+const inputArea      = document.getElementById("input-area");
+const restartBtn     = document.getElementById("restart-btn");
+const saveBtn        = document.getElementById("save-btn");
+const skipBtn        = document.getElementById("skip-btn");
 
-let pairTimes  = {};
-let prevChar   = null;
-let prevStamp  = null;
-let ended      = false;
+const pairOut        = document.getElementById("pair-output");
+const typedOut       = document.getElementById("typed-words");
 
-/* ==== utilities ==== */
-function randomLines(n) {
-    const picked = [];
-    while (picked.length < n && allLines.length) {
-        const i = Math.floor(Math.random() * allLines.length);
-        picked.push(allLines.splice(i, 1)[0]);
+const currentLineEl  = document.getElementById("current-word");
+const lineNumEl      = document.getElementById("word-number");
+
+const slider         = document.getElementById("count-slider");
+const countDisp      = document.getElementById("count-display");
+
+const totalLinesEl = document.getElementById("total-lines");
+
+/* ---------- dynamic state ---------- */
+let sentences        = [];      // full list from file
+let targetLines      = [];      // lines chosen for this run
+let linesToType      = Number(slider.value);
+
+let idx              = 0;       // 0‑based index of current prompt
+let typedLines       = [];      // what the user actually typed / skipped
+
+let pairTimes        = {};      // { "H->e": [34, 27, …], … }
+
+let prevChar  = null;           // previous key pressed (normalised)
+let prevStamp = null;           // timestamp of previous key
+let ended     = false;
+
+/* =========================================================
+   Utility helpers
+   ========================================================= */
+function pickRandomLines(n) {
+    /* return n random distinct lines (simple shuffle‑slice) */
+    const arr = sentences.slice();                    // shallow copy
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-    return picked;
-}
-function showCurrent() {
-    lineNumEl.textContent = idx + 1;
-    currentLineEl.textContent = targetLines[idx] || "—";
+    return arr.slice(0, n);
 }
 
-/* ==== key handling ==== */
+function updatePromptDisplay() {
+    lineNumEl.textContent = idx + 1;
+    currentLineEl.textContent = targetLines[idx] ?? "—";
+    totalLinesEl.textContent  = linesToType;
+}
+
+/* =========================================================
+   Slider – live update of sentence count
+   ========================================================= */
+slider.addEventListener("input", () => {
+    linesToType = Number(slider.value);         // new limit
+    countDisp.textContent = linesToType;
+    totalLinesEl.textContent = linesToType;
+
+    /* if we’ve already typed that many (or more) sentences,
+       end the run right away                              */
+    if (!ended && idx >= linesToType) {
+        finishSession();
+    }
+});
+
+/* =========================================================
+   Keystroke tracking
+   ========================================================= */
 inputArea.addEventListener("keydown", e => {
     if (ended) return;
 
-    let k = e.key === "Enter" ? "\n"
+    /* normalise key into printable / symbolic form */
+    let key = e.key === "Enter" ? "\n"
         : e.key === "Backspace" ? "␈"
             : e.key;
 
     const now = performance.now();
 
     if (prevChar !== null) {
-        const d = now - prevStamp;
-        const sameBurst   = d < GAP_MS;
-        const touchesLF   = (prevChar === "\n" || k === "\n");
-        const withinCap   = d <= MAX_MS;
+        const gap = now - prevStamp;
+        const sameBurst   = gap < GAP_MS;
+        const withinCap   = gap <= MAX_MS;
+        const touchesLF   = prevChar === "\n" || key === "\n";
 
-        if (sameBurst && !touchesLF && withinCap) {
-            const pair = `${prevChar}->${k}`;
-            (pairTimes[pair] ||= []).push(Math.round(d));
+        if (sameBurst && withinCap && !touchesLF) {
+            const pair = `${prevChar}->${key}`;
+            (pairTimes[pair] ||= []).push(Math.round(gap));
         }
     }
-    prevChar = k;
+    prevChar  = key;
     prevStamp = now;
 
-    /* submit on Enter */
+    /* submit current line on Enter */
     if (e.key === "Enter") {
-        e.preventDefault();                    // keep textarea single‑line
+        e.preventDefault();                // keep textarea single‑line
+
         typedLines.push(inputArea.value.trim());
         idx++;
 
-        if (idx >= LINES_TO_TYPE) finish();
-        else {
+        if (idx >= linesToType) {
+            finishSession();
+        } else {
             inputArea.value = "";
-            showCurrent();
+            updatePromptDisplay();
         }
     }
 });
 
-/* ---------- skip handler ---------- */
-function skipLine() {
+/* =========================================================
+   Button: Skip
+   ========================================================= */
+skipBtn.addEventListener("click", () => {
     if (ended) return;
 
     typedLines.push("[skipped]");
     idx++;
 
-    /* clear timing state so the long gap doesn’t pollute data */
+    /* reset previous‑key tracking so long gap isn’t recorded */
     prevChar = prevStamp = null;
 
-    if (idx >= LINES_TO_TYPE) {
-        finish();
+    if (idx >= linesToType) {
+        finishSession();
     } else {
         inputArea.value = "";
-        showCurrent();
+        updatePromptDisplay();
     }
-}
-
-skipBtn.addEventListener("click", skipLine);
-
-/* ==== finish / restart ==== */
-function finish() {
-    ended = true;
-    inputArea.disabled = true;
-    pairOut.textContent  = JSON.stringify(pairTimes, null, 2);
-    typedOut.textContent = typedLines.join("\n");
-}
-restartBtn.addEventListener("click", () => {
-    pairTimes = {}; typedLines = [];
-    prevChar = prevStamp = null;
-    idx = 0; ended = false;
-
-    /* re‑pick lines (allow repeats if you restart often) */
-    targetLines = randomLines(LINES_TO_TYPE);
-    showCurrent();
-
-    inputArea.value = "";
-    inputArea.disabled = false;
-    pairOut.textContent  = "— will appear when done —";
-    typedOut.textContent = "— will appear when done —";
-    inputArea.focus();
 });
+
+/* =========================================================
+   Button: Restart
+   ========================================================= */
+restartBtn.addEventListener("click", startNewSession);
+
+function startNewSession() {
+    /* (re)‑initialise run‑time state */
+    pairTimes   = {};
+    typedLines  = [];
+    prevChar = prevStamp = null;
+    idx      = 0;
+    ended    = false;
+
+    linesToType = Number(slider.value);
+    countDisp.textContent = linesToType;
+
+    /* pick fresh prompts */
+    targetLines = pickRandomLines(linesToType);
+    updatePromptDisplay();
+
+    /* reset UI */
+    inputArea.disabled  = false;
+    inputArea.value     = "";
+    pairOut.textContent = "— will appear when done —";
+    typedOut.textContent= "— will appear when done —";
+    inputArea.focus();
+}
+
+/* =========================================================
+   Button: Save JSON
+   ========================================================= */
 saveBtn.addEventListener("click", () => {
-    const blob = new Blob([JSON.stringify(pairTimes, null, 2)], {type:"application/json"});
-    const url  = URL.createObjectURL(blob);
-    const a = Object.assign(document.createElement("a"), {href:url, download:"typing-pair-timings.json"});
-    document.body.appendChild(a).click(); a.remove();
+    const blob = new Blob(
+        [JSON.stringify(pairTimes, null, 2)],
+        { type: "application/json" }
+    );
+    const url = URL.createObjectURL(blob);
+
+    const a = Object.assign(document.createElement("a"), {
+        href: url, download: "typing-pair-timings.json"
+    });
+    document.body.appendChild(a).click();
+    a.remove();
     URL.revokeObjectURL(url);
 });
 
-/* ==== load sentence list then start ==== */
+/* =========================================================
+   Finish session
+   ========================================================= */
+function finishSession() {
+    ended = true;
+    inputArea.disabled = true;
+
+    pairOut.textContent  = JSON.stringify(pairTimes, null, 2);
+    typedOut.textContent = typedLines.join("\n");
+}
+
+/* =========================================================
+   Startup: load sentence list then begin first run
+   ========================================================= */
 (async () => {
-    const res = await fetch("sentences.txt");
-    const txt = await res.text();
-    allLines = txt.split(/\r?\n/).filter(Boolean);
-    targetLines = randomLines(LINES_TO_TYPE);
-    showCurrent();
+    try {
+        const res = await fetch("sentences.txt");
+        const txt = await res.text();
+        sentences = txt.split(/\r?\n/).filter(Boolean);
+
+        if (sentences.length === 0) {
+            currentLineEl.textContent = "No sentences found in sentences.txt";
+            inputArea.disabled = true;
+            return;
+        }
+
+        startNewSession();
+    } catch (err) {
+        currentLineEl.textContent = "Failed to load sentences.txt";
+        console.error(err);
+    }
 })();
