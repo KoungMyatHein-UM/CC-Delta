@@ -140,3 +140,16 @@ button {
     margin-top: 10px;
     color: #cfeef4;
 }
+
+.typing-guide {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    color: #a6dfe7;
+    font-size: 0.95em;
+    line-height: 1.5;
+}
+.typing-guide strong {
+    color: #dffafe;
+}
