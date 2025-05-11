@@ -1,50 +1,142 @@
+/* === Base Layout === */
 body {
-    font-family: sans-serif;
-    background: #f4f4f4;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #102326, #1a3b41);
     display: flex;
     justify-content: center;
     padding: 50px;
+    margin: 0;
+    color: #e0f4f8;
 }
 
+/* === Frosted Container === */
 .container {
-    background: #fff;
+    background: rgba(16, 35, 38, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     max-width: 700px;
     width: 100%;
     padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,.1);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+    border-radius: 0;
 }
 
-#sample-text {
-    font-size: 1.2em;
+/* === Headings === */
+h1, h2 {
+    margin-top: 0;
+    font-weight: 500;
+    color: #cfeef4;
+}
+
+/* === Sentence Indicator === */
+.sentence-header {
     margin-bottom: 20px;
 }
 
+.sentence-header p {
+    margin: 0 0 8px 0;
+    font-size: 1em;
+    color: #9ccbd1;
+}
+
+#current-word {
+    font-size: 1.5em;
+    font-weight: bold;
+    background: rgba(102, 211, 233, 0.1);
+    border: 1px solid #4fbacc;
+    padding: 12px 18px;
+    color: #ffc600;
+    box-shadow: 0 0 8px rgba(102, 211, 233, 0.3);
+    border-radius: 0;
+}
+
+/* === Text Input === */
 #input-area {
     width: 100%;
     height: 120px;
-    font-size: 1.1em;
-    padding: 10px;
-    border: 2px solid #ccc;
-    border-radius: 5px;
+    font-size: 1.5em;
+    font-weight: 500;
+    padding: 12px 14px;
+    background: #223638;
+    color: #dffafe;
+    border: 1px solid #4fbacc;
+    box-shadow: inset 0 0 5px rgba(102, 211, 233, 0.2);
+    border-radius: 0;
     resize: none;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    caret-color: #66d3e9;
+    transition: box-shadow 0.2s ease;
 }
 
-.stats { margin-top: 20px; font-size: 1.1em; }
+#input-area:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(102, 211, 233, 0.3);
+}
 
-#restart-btn {
-    margin-top: 20px;
-    padding: 10px 20px;
+
+/* === Sentence Slider === */
+#count-slider {
+    vertical-align: middle;
+    width: 100%;
+}
+
+p {
+    margin: 20px 0;
+}
+
+/* === Button Reset === */
+button {
+    border: none;
+    padding: 10px 24px;
     font-size: 1em;
     cursor: pointer;
+    margin-top: 20px;
+    margin-right: 10px;
+    transition: background 0.2s ease, transform 0.1s ease;
+    border-radius: 0;
 }
 
-#pair-output {
-    background: #fafafa;
-    border: 1px solid #ddd;
+/* === Save (Primary) === */
+#save-btn {
+    background-color: #66d3e9;
+    color: #102326;
+    font-weight: bold;
+    box-shadow: 0 2px 10px rgba(102, 211, 233, 0.3);
+}
+#save-btn:hover {
+    background-color: #4fbacc;
+}
+
+/* === Skip (Secondary) === */
+#skip-btn {
+    background-color: #3e5855;
+    color: #d0eae7;
+}
+#skip-btn:hover {
+    background-color: #506e6a;
+}
+
+/* === Restart (Tertiary) === */
+#restart-btn {
+    background-color: transparent;
+    border: 1px solid #3e5855;
+    color: #9fb8b5;
+}
+#restart-btn:hover {
+    background-color: #2b3f3d;
+}
+
+/* === Output Boxes === */
+#pair-output,
+#typed-words {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 15px;
-    border-radius: 5px;
     white-space: pre-wrap;
     max-height: 300px;
     overflow-y: auto;
+    margin-top: 10px;
+    color: #cfeef4;
 }
