@@ -2,18 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Typing Checker</title>
+    <title>CCΔ</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="container">
-    <h1>Typing Checker</h1>
+    <h1>CCΔ</h1>
 
-    <p>
-        Sentence <span id="word-number">1</span> of
-        <span id="total-lines">10</span>:
-        <strong id="current-word">Loading…</strong>
-    </p>
+    <div class="sentence-header">
+        <p>Sentence <span id="word-number">1</span> of <span id="total-lines">10</span>:</p>
+        <div id="current-word">Loading…</div>
+    </div>
 
     <textarea id="input-area" placeholder="Type the word and press Enter…" autofocus></textarea>
 
@@ -22,9 +21,9 @@
         <input id="count-slider" type="range" min="5" max="15" value="10" step="1">
     </p>
 
-    <button id="restart-btn">Restart</button>
-    <button id="skip-btn">Skip</button>
     <button id="save-btn">Save Results</button>
+    <button id="skip-btn">Skip</button>
+    <button id="restart-btn">Restart</button>
 
     <h2>Character-pair timings (ms)</h2>
     <pre id="pair-output">— will appear when done —</pre>
