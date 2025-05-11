@@ -3,17 +3,16 @@ body {
     background: #f4f4f4;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
     padding: 50px;
 }
 
 .container {
-    background: white;
+    background: #fff;
+    max-width: 700px;
+    width: 100%;
     padding: 30px;
     border-radius: 10px;
-    max-width: 600px;
-    width: 100%;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 10px rgba(0,0,0,.1);
 }
 
 #sample-text {
@@ -31,14 +30,21 @@ body {
     resize: none;
 }
 
-.stats {
-    margin-top: 20px;
-    font-size: 1.1em;
-}
+.stats { margin-top: 20px; font-size: 1.1em; }
 
 #restart-btn {
     margin-top: 20px;
     padding: 10px 20px;
     font-size: 1em;
     cursor: pointer;
+}
+
+#pair-output {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 5px;
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow-y: auto;
 }

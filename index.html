@@ -1,10 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Typing Trainer</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-$END$
+<div class="container">
+    <h1>Typing Trainer</h1>
+
+    <!-- words the user must copy -->
+    <p id="sample-text">Loading…</p>
+
+    <!-- typing area -->
+    <textarea id="input-area" placeholder="Start typing here…" autofocus></textarea>
+
+    <!-- live stats -->
+    <div class="stats">
+        <p>Speed: <span id="wpm">0</span> WPM</p>
+        <p>Accuracy: <span id="accuracy">100</span>%</p>
+    </div>
+
+    <!-- restart -->
+    <button id="restart-btn">Restart</button>
+
+    <!-- pair‑timing report appears here after the run -->
+    <h2>Character‑pair timings (ms)</h2>
+    <pre id="pair-output">— will appear when done —</pre>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
