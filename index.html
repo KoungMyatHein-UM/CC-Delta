@@ -9,24 +9,18 @@
 <div class="container">
     <h1>Typing Trainer</h1>
 
-    <!-- words the user must copy -->
-    <p id="sample-text">Loading…</p>
+    <p>Word <span id="word-number">1</span>/10: <strong id="current-word">Loading…</strong></p>
+    <textarea id="input-area" placeholder="Type the word and press Enter…" autofocus></textarea>
 
-    <!-- typing area -->
-    <textarea id="input-area" placeholder="Start typing here…" autofocus></textarea>
-
-    <!-- live stats -->
-    <div class="stats">
-        <p>Speed: <span id="wpm">0</span> WPM</p>
-        <p>Accuracy: <span id="accuracy">100</span>%</p>
-    </div>
-
-    <!-- restart -->
     <button id="restart-btn">Restart</button>
+    <button id="skip-btn">Skip</button>
+    <button id="save-btn">Save Results</button>
 
-    <!-- pair‑timing report appears here after the run -->
-    <h2>Character‑pair timings (ms)</h2>
+    <h2>Character-pair timings (ms)</h2>
     <pre id="pair-output">— will appear when done —</pre>
+
+    <h2>Typed Sentences</h2>
+    <pre id="typed-words">— will appear when done —</pre>
 </div>
 
 <script src="script.js"></script>
