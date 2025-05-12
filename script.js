@@ -103,7 +103,7 @@ inputArea.addEventListener("keydown", e => {
     if (ended) return;
 
     // normalise key name
-    let key = e.key === "Enter"     ? "\n"
+    let key = e.key === "Enter"     ? "\\n"
         : e.key === "Backspace" ? "␈"
             : e.key;
 
