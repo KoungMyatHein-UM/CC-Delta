@@ -103,9 +103,25 @@ inputArea.addEventListener("keydown", e => {
     if (ended) return;
 
     // normalise key name
-    let key = e.key === "Enter"     ? "\\n"
-        : e.key === "Backspace" ? "␈"
-            : e.key;
+    let key =
+        e.key === "Enter"      ? "\\n"    :
+        e.key === "Backspace"  ? "␈"      :
+        e.key === " "          ? "␣"      :
+        e.key === "Tab"        ? "⇥"      :
+        e.key === "Escape"     ? "⎋"      :
+        e.key === "ArrowLeft"  ? "←"      :
+        e.key === "ArrowRight" ? "→"      :
+        e.key === "ArrowUp"    ? "↑"      :
+        e.key === "ArrowDown"  ? "↓"      :
+        e.key === "Home"       ? "⇱"      :
+        e.key === "End"        ? "⇲"      :
+        e.key === "PageUp"     ? "⇞"      :
+        e.key === "PageDown"   ? "⇟"      :
+        e.key === "Delete"     ? "⌦"      :
+        e.key === "Insert"     ? "⎀"      :
+        e.key;
+
+
 
     const now = performance.now();
 
